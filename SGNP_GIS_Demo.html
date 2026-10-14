@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGNP Wildfire Susceptibility Mapping — Live GIS Workstation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0d1117;color:#e6edf3;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* TOP BAR */
+#topbar{background:linear-gradient(135deg,#1b2a4a 0%,#0d1b35 100%);border-bottom:1px solid #30363d;padding:0 14px;height:52px;display:flex;align-items:center;gap:10px;flex-shrink:0;box-shadow:0 2px 12px rgba(0,0,0,0.5);z-index:1000}
+#topbar .logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;color:#58a6ff}
+#topbar .logo span{font-size:20px}
+#topbar .title{color:#e6edf3;font-size:13px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:340px}
+#topbar .sep{width:1px;height:26px;background:#30363d;margin:0 2px}
+
+/* MODE TOGGLE */
+.mode-toggle{display:flex;background:rgba(0,0,0,0.3);border:1px solid #30363d;border-radius:6px;padding:2px}
+.mode-btn{background:transparent;border:none;padding:5px 11px;color:#8b949e;font-size:11.5px;font-weight:600;cursor:pointer;border-radius:4px;transition:all .2s;font-family:'Inter',sans-serif}
+.mode-btn.active{background:#238636;color:#ffffff;box-shadow:0 1px 4px rgba(0,0,0,0.4)}
+.mode-btn:hover:not(.active){color:#c9d1d9;background:rgba(255,255,255,0.05)}
+
+.tb-btn{background:rgba(255,255,255,0.06);border:1px solid #30363d;border-radius:5px;padding:5px 10px;color:#c9d1d9;font-size:11.5px;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;white-space:nowrap}
+.tb-btn:hover{background:rgba(88,166,255,.15);border-color:#58a6ff;color:#58a6ff}
+.tb-btn.active{background:rgba(88,166,255,.2);border-color:#58a6ff;color:#58a6ff;font-weight:600}
+.spacer{flex:1}
+.aprx-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(210,153,34,.15);border:1px solid #d29922;border-radius:5px;padding:3px 8px;font-size:11px;color:#d29922;font-weight:600}
+.proj-badge{background:rgba(63,185,80,.15);border:1px solid #3fb950;border-radius:4px;padding:3px 8px;color:#3fb950;font-size:11px;font-weight:600}
+
+/* MAIN LAYOUT */
+#main{display:flex;flex:1;overflow:hidden;position:relative}
+
+/* LEFT PANEL */
+#left{width:270px;background:#161b22;border-right:1px solid #21262d;display:flex;flex-direction:column;flex-shrink:0}
+#left-header{padding:10px 14px;border-bottom:1px solid #21262d;font-size:11px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.08em;display:flex;justify-content:space-between;align-items:center}
+#layers{flex:1;overflow-y:auto;padding:8px}
+.layer-group{margin-bottom:8px}
+.lg-title{padding:5px 8px;font-size:11px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;display:flex;align-items:center;gap:6px;border-radius:5px}
+.lg-title:hover{background:rgba(255,255,255,.04)}
+.layer-item{display:flex;align-items:center;gap:8px;padding:6px 10px 6px 18px;border-radius:5px;cursor:pointer;transition:background .15s;margin-bottom:1px}
+.layer-item:hover{background:rgba(255,255,255,.05)}
+.layer-item.active{background:rgba(88,166,255,.12);border-left:2px solid #58a6ff}
+.layer-item input[type=checkbox]{width:14px;height:14px;accent-color:#58a6ff;cursor:pointer}
+.layer-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+.layer-name{font-size:11.5px;color:#c9d1d9;flex:1}
+.layer-sym{font-size:10px;color:#8b949e}
+
+/* SLIDER */
+.opacity-ctrl{padding:8px 14px;background:#0d1117;border-top:1px solid #21262d;font-size:11px}
+.opacity-ctrl label{display:flex;justify-content:space-between;color:#8b949e;margin-bottom:4px}
+.opacity-ctrl input[type=range]{width:100%;accent-color:#58a6ff}
+
+/* ATTR TABLE */
+#attr-table{border-top:1px solid #21262d;height:155px;overflow-y:auto;padding:8px}
+#attr-table-header{font-size:11px;font-weight:700;color:#58a6ff;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
+table.attr{width:100%;border-collapse:collapse;font-size:10.5px}
+table.attr th{background:#1c2128;color:#8b949e;padding:4px 6px;text-align:left;border-bottom:1px solid #21262d;font-weight:600}
+table.attr td{padding:4px 6px;color:#c9d1d9;border-bottom:1px solid #161b22}
+table.attr tr:hover td{background:rgba(88,166,255,.08)}
+
+/* CENTER VIEW */
+#center{flex:1;display:flex;flex-direction:column;position:relative;overflow:hidden}
+#toolbar{background:#161b22;border-bottom:1px solid #21262d;padding:6px 12px;display:flex;gap:6px;align-items:center;flex-shrink:0}
+.tool-btn{background:transparent;border:1px solid transparent;border-radius:4px;padding:4px 8px;color:#8b949e;font-size:11.5px;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:4px}
+.tool-btn:hover{background:rgba(255,255,255,.06);border-color:#30363d;color:#c9d1d9}
+.tool-btn.sel{background:rgba(88,166,255,.15);border-color:#58a6ff;color:#58a6ff;font-weight:600}
+.tool-sep{width:1px;height:20px;background:#21262d;margin:0 4px}
+#zoom-info{font-size:11px;color:#8b949e;font-family:'JetBrains Mono',monospace}
+#coord-info{font-size:11px;color:#58a6ff;font-family:'JetBrains Mono',monospace;margin-left:auto}
+
+/* MAP CONTAINERS */
+#map-viewport{flex:1;position:relative;background:#06090e;overflow:hidden}
+#leaflet-map{width:100%;height:100%;z-index:10}
+#layout-view{position:absolute;top:0;left:0;right:0;bottom:0;display:none;background:#0d1117;z-index:20;flex-direction:column;align-items:center;justify-content:center;overflow:auto;padding:12px}
+#layout-view img{max-width:98%;max-height:98%;object-fit:contain;border:1px solid #30363d;box-shadow:0 8px 32px rgba(0,0,0,0.8);border-radius:4px}
+.layout-badge{position:absolute;top:20px;left:20px;background:rgba(13,17,23,0.9);border:1px solid #58a6ff;padding:6px 14px;border-radius:6px;font-size:12px;color:#58a6ff;font-weight:600;z-index:30}
+
+/* STATUS BAR */
+#statusbar{background:#0d1117;border-top:1px solid #21262d;padding:4px 14px;display:flex;gap:16px;align-items:center;flex-shrink:0}
+#statusbar span{font-size:10.5px;color:#8b949e;font-family:'JetBrains Mono',monospace}
+#statusbar .sb-val{color:#58a6ff;font-weight:500}
+.progress-wrap{height:3px;background:#21262d;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,#58a6ff,#3fb950);transition:width .4s}
+
+/* RIGHT PANEL */
+#right{width:290px;background:#161b22;border-left:1px solid #21262d;display:flex;flex-direction:column;flex-shrink:0}
+#right-header{padding:10px 14px;border-bottom:1px solid #21262d}
+#right-header h3{font-size:12.5px;font-weight:700;color:#e6edf3}
+#right-header p{font-size:11px;color:#8b949e}
+#stats-panel{flex:1;overflow-y:auto;padding:10px}
+.stat-card{background:#0d1117;border:1px solid #21262d;border-radius:7px;padding:10px;margin-bottom:8px}
+.stat-card h4{font-size:10.5px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.stat-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.stat-label{font-size:11.5px;color:#c9d1d9}
+.stat-val{font-size:11.5px;font-weight:600;color:#e6edf3;font-family:'JetBrains Mono',monospace}
+.risk-bar{height:5px;border-radius:3px;margin-top:2px;transition:width .5s}
+.legend-item{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.legend-swatch{width:18px;height:9px;border-radius:2px;flex-shrink:0}
+.legend-txt{font-size:11px;color:#c9d1d9}
+.legend-pct{font-size:10.5px;color:#8b949e;margin-left:auto;font-family:'JetBrains Mono',monospace}
+
+/* LOG & GEOPROCESSING */
+.analysis-log{background:#0a0e14;border:1px solid #21262d;border-radius:5px;padding:8px;max-height:110px;overflow-y:auto}
+.log-line{font-size:10.5px;font-family:'JetBrains Mono',monospace;color:#8b949e;line-height:1.45}
+.log-line.ok{color:#3fb950}
+.log-line.info{color:#58a6ff}
+#geoprocess{background:#0d1117;border-top:1px solid #21262d;padding:8px;flex-shrink:0}
+#geoprocess h4{font-size:10.5px;font-weight:700;color:#8b949e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.gp-tool{display:flex;align-items:center;gap:6px;padding:5px 7px;border-radius:4px;cursor:pointer;border:1px solid #21262d;margin-bottom:3px;background:#0d1117;font-size:11px}
+.gp-tool:hover{background:#161b22;border-color:#58a6ff}
+.gp-name{font-size:11px;color:#c9d1d9;flex:1}
+.gp-status{font-size:9.5px;color:#3fb950;font-family:'JetBrains Mono',monospace;font-weight:600}
+
+/* POPUP CUSTOM STYLING */
+.leaflet-popup-content-wrapper{background:#0d1117!important;color:#e6edf3!important;border:1px solid #58a6ff;border-radius:6px;box-shadow:0 6px 20px rgba(0,0,0,0.7)}
+.leaflet-popup-tip{background:#0d1117!important;border:1px solid #58a6ff}
+.gis-popup{padding:4px}
+.gis-popup h4{font-size:12.5px;color:#58a6ff;margin-bottom:4px;border-bottom:1px solid #21262d;padding-bottom:3px}
+.gis-popup-row{display:flex;justify-content:space-between;gap:12px;font-size:11px;margin-bottom:2px}
+.gis-popup-label{color:#8b949e}
+.gis-popup-val{font-weight:600;font-family:'JetBrains Mono',monospace}
+.badge-danger{background:#d7191c;color:#fff;padding:1px 5px;border-radius:3px;font-size:10px}
+.badge-warn{background:#fdae61;color:#111;padding:1px 5px;border-radius:3px;font-size:10px}
+.badge-safe{background:#1a9641;color:#fff;padding:1px 5px;border-radius:3px;font-size:10px}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="logo"><span>🔥</span>SGNP GIS Pro</div>
+  <div class="sep"></div>
+  <div class="title" title="Wildfire Susceptibility Mapping — Sanjay Gandhi National Park, Mumbai">Wildfire Susceptibility Mapping — SGNP, Mumbai</div>
+  <div class="sep"></div>
+  
+  <!-- MODE SELECTOR -->
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="btnModeLive" onclick="switchViewerMode('live')">🛰 Live Leaflet GIS</button>
+    <button class="mode-btn" id="btnModeLayout" onclick="switchViewerMode('layout')">📄 ArcGIS Plate Export</button>
+  </div>
+
+  <div class="sep"></div>
+  <!-- VIEW PRESETS -->
+  <button class="tb-btn active" id="btn-study" onclick="setViewPreset('study')">Study Area</button>
+  <button class="tb-btn" id="btn-susc" onclick="setViewPreset('susc')">Susceptibility (WSI)</button>
+  <button class="tb-btn" id="btn-risk" onclick="setViewPreset('risk')">Risk & Assets</button>
+  <button class="tb-btn" id="btn-evac" onclick="setViewPreset('evac')">Evacuation</button>
+
+  <div class="spacer"></div>
+  <div class="aprx-badge">📁 SGNP_Wildfire.aprx</div>
+  <div class="sep"></div>
+  <div class="proj-badge">✓ Live Satellite Connected</div>
+</div>
+
+<!-- MAIN WORKSPACE -->
+<div id="main">
+  <!-- LEFT PANEL: TABLE OF CONTENTS -->
+  <div id="left">
+    <div id="left-header">
+      <span>📂 Table of Contents</span>
+      <span style="font-size:10px;color:#58a6ff;cursor:pointer" onclick="resetLayers()">Reset</span>
+    </div>
+
+    <div id="layers">
+      <div class="layer-group">
+        <div class="lg-title" onclick="toggleGroup('g1')">▼ Analytical Overlays</div>
+        <div id="g1">
+          <div class="layer-item active" id="item-wsi">
+            <input type="checkbox" id="chk-wsi" checked onchange="toggleGISLayer('wsi')">
+            <div class="layer-dot" style="background:linear-gradient(135deg,#d7191c,#1a9641)"></div>
+            <span class="layer-name">WSI Susceptibility Heatmap</span>
+            <span class="layer-sym">30m</span>
+          </div>
+          <div class="layer-item active" id="item-wui">
+            <input type="checkbox" id="chk-wui" checked onchange="toggleGISLayer('wui')">
+            <div class="layer-dot" style="background:#ff5722;border:1px dashed #ffffff"></div>
+            <span class="layer-name">500m WUI Exposure Buffer</span>
+            <span class="layer-sym">Buffer</span>
+          </div>
+          <div class="layer-item active" id="item-hotspots">
+            <input type="checkbox" id="chk-hotspots" checked onchange="toggleGISLayer('hotspots')">
+            <div class="layer-dot" style="background:#ff1744"></div>
+            <span class="layer-name">High-Risk Ignition Hotspots</span>
+            <span class="layer-sym">Points</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="layer-group">
+        <div class="lg-title" onclick="toggleGroup('g2')">▼ Base Vector Features</div>
+        <div id="g2">
+          <div class="layer-item active" id="item-bound">
+            <input type="checkbox" id="chk-bound" checked onchange="toggleGISLayer('bound')">
+            <div class="layer-dot" style="border:2px solid #ffff00;background:rgba(63,185,80,0.2)"></div>
+            <span class="layer-name">SGNP Boundary (103.84 km²)</span>
+          </div>
+          <div class="layer-item active" id="item-water">
+            <input type="checkbox" id="chk-water" checked onchange="toggleGISLayer('water')">
+            <div class="layer-dot" style="background:#00bcd4"></div>
+            <span class="layer-name">Freshwater Lakes (Tulsi/Vihar)</span>
+          </div>
+          <div class="layer-item active" id="item-landmarks">
+            <input type="checkbox" id="chk-landmarks" checked onchange="toggleGISLayer('landmarks')">
+            <div class="layer-dot" style="background:#00e5ff"></div>
+            <span class="layer-name">Landmarks & Heritage Sites</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="layer-group">
+        <div class="lg-title" onclick="toggleGroup('g3')">▼ Response & Evacuation</div>
+        <div id="g3">
+          <div class="layer-item active" id="item-stations">
+            <input type="checkbox" id="chk-stations" checked onchange="toggleGISLayer('stations')">
+            <div class="layer-dot" style="background:#ff1744;border-radius:2px"></div>
+            <span class="layer-name">Fire Stations & Watchtowers</span>
+          </div>
+          <div class="layer-item active" id="item-routes">
+            <input type="checkbox" id="chk-routes" checked onchange="toggleGISLayer('routes')">
+            <div class="layer-dot" style="background:#00e676"></div>
+            <span class="layer-name">Evacuation Routes & Isochrones</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPACITY SLIDER -->
+    <div class="opacity-ctrl">
+      <label><span>WSI Layer Opacity</span><span id="op-val">55%</span></label>
+      <input type="range" id="op-slider" min="0" max="100" value="55" oninput="changeWsiOpacity(this.value)">
+    </div>
+
+    <!-- ATTRIBUTE TABLE -->
+    <div id="attr-table">
+      <div id="attr-table-header">📊 Attribute Table — SGNP Zonation</div>
+      <table class="attr" id="attrTbl">
+        <thead><tr><th>FID</th><th>Class</th><th>Area(km²)</th><th>Risk Level</th></tr></thead>
+        <tbody id="attrBody">
+          <tr><td>1</td><td>Very High</td><td>9.9</td><td><span class="badge-danger">0.85 – 1.00</span></td></tr>
+          <tr><td>2</td><td>High</td><td>20.5</td><td><span class="badge-warn">0.70 – 0.84</span></td></tr>
+          <tr><td>3</td><td>Moderate</td><td>29.2</td><td>0.50 – 0.69</td></tr>
+          <tr><td>4</td><td>Low</td><td>25.4</td><td>0.25 – 0.49</td></tr>
+          <tr><td>5</td><td>Very Low</td><td>18.9</td><td><span class="badge-safe">0.00 – 0.24</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CENTER: MAP CONTAINER -->
+  <div id="center">
+    <div id="toolbar">
+      <button class="tool-btn sel" id="t-pan" onclick="setActiveTool('pan')">🖐 Pan</button>
+      <button class="tool-btn" id="t-identify" onclick="setActiveTool('identify')">ℹ Identify Tool</button>
+      <div class="tool-sep"></div>
+      <button class="tool-btn" onclick="zoomTo('full')">🎯 Full SGNP</button>
+      <button class="tool-btn" onclick="zoomTo('kanheri')">🏛 Kanheri</button>
+      <button class="tool-btn" onclick="zoomTo('yeoor')">⛰ Yeoor Ridge</button>
+      <button class="tool-btn" onclick="zoomTo('tulsi')">💧 Lakes</button>
+      <div class="tool-sep"></div>
+      <button class="tool-btn" onclick="setLeafletBasemap('satellite')">🛰 Esri Satellite</button>
+      <button class="tool-btn" onclick="setLeafletBasemap('topo')">⛰ Topo</button>
+      <button class="tool-btn" onclick="setLeafletBasemap('osm')">🗺 Street</button>
+      <div class="tool-sep"></div>
+      <button class="tool-btn" onclick="runGP('weighted')">⚙ Run Overlay</button>
+      <span id="coord-info">19.2200°N 72.9120°E | Elev: 210m</span>
+    </div>
+
+    <!-- VIEWPORT: Leaflet Map or Published Layout -->
+    <div id="map-viewport">
+      <!-- LEAFLET INTERACTIVE MAP -->
+      <div id="leaflet-map"></div>
+
+      <!-- ARCGIS PUBLISHED PLATE VIEW -->
+      <div id="layout-view">
+        <div class="layout-badge" id="layout-title-badge">ArcGIS Pro 300 DPI Published Plate — Map 1</div>
+        <img id="layout-img" src="visuals/map_01_study_area.png" alt="Cartographic Layout">
+      </div>
+    </div>
+
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:100%"></div></div>
+
+    <!-- STATUS BAR -->
+    <div id="statusbar">
+      <span>📍 CRS: <span class="sb-val">WGS 1984 Web Mercator (EPSG:3857)</span></span>
+      <span>📐 SGNP Extent: <span class="sb-val">72.852°E–72.978°E, 19.138°N–19.290°N</span></span>
+      <span>🛰 Basemap: <span class="sb-val" id="sb-bm">Esri World Imagery (High-Res)</span></span>
+      <span>⏱ Status: <span class="sb-val" id="sb-status">Interactive & Ready</span></span>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL: STATS & GEOPROCESSING -->
+  <div id="right">
+    <div id="right-header">
+      <h3 id="rh-title">📈 Spatial Analysis Engine</h3>
+      <p id="rh-sub">Multi-Criteria Evaluation & Risk Zonation</p>
+    </div>
+
+    <div id="stats-panel">
+      <!-- LEGEND -->
+      <div class="stat-card">
+        <h4>🗺 Zonation Legend</h4>
+        <div id="legend-content">
+          <div class="legend-item"><div class="legend-swatch" style="background:#d7191c"></div><span class="legend-txt">Very High Susceptibility</span><span class="legend-pct">9.5%</span></div>
+          <div class="legend-item"><div class="legend-swatch" style="background:#fdae61"></div><span class="legend-txt">High Susceptibility</span><span class="legend-pct">19.7%</span></div>
+          <div class="legend-item"><div class="legend-swatch" style="background:#ffffbf"></div><span class="legend-txt" style="color:#d4d4d4">Moderate Susceptibility</span><span class="legend-pct">28.1%</span></div>
+          <div class="legend-item"><div class="legend-swatch" style="background:#a6d96a"></div><span class="legend-txt">Low Susceptibility</span><span class="legend-pct">24.5%</span></div>
+          <div class="legend-item"><div class="legend-swatch" style="background:#1a9641"></div><span class="legend-txt">Very Low (Lake Catchments)</span><span class="legend-pct">18.2%</span></div>
+        </div>
+      </div>
+
+      <!-- KEY METRICS -->
+      <div class="stat-card">
+        <h4>📊 Quantitative Indicators</h4>
+        <div class="stat-row"><span class="stat-label">Total Park Area</span><span class="stat-val">103.84 km²</span></div>
+        <div class="stat-row"><span class="stat-label">Critical WSI Area</span><span class="stat-val">30.40 km²</span></div>
+        <div class="stat-row"><span class="stat-label">Urban WUI Perimeter</span><span class="stat-val">42.8 km</span></div>
+        <div class="stat-row"><span class="stat-label">Vulnerable Padas</span><span class="stat-val">7 Tribal Clusters</span></div>
+        <div class="stat-row"><span class="stat-label">Watchtower Sightline</span><span class="stat-val">88.4% Coverage</span></div>
+        <div class="stat-row"><span class="stat-label">Max Response Time</span><span class="stat-val">28 minutes</span></div>
+      </div>
+
+      <!-- AHP WEIGHTS -->
+      <div class="stat-card">
+        <h4>⚖ Multi-Criteria AHP Weights</h4>
+        <div class="stat-row"><span class="stat-label">Slope & Aspect</span><span class="stat-val">35%</span></div>
+        <div class="risk-bar" style="width:35%;background:#d7191c"></div>
+        <div style="margin-top:5px"><div class="stat-row"><span class="stat-label">NDVI / Fuel Dryness</span><span class="stat-val">30%</span></div></div>
+        <div class="risk-bar" style="width:30%;background:#f46d43"></div>
+        <div style="margin-top:5px"><div class="stat-row"><span class="stat-label">WUI Settlements Prox.</span><span class="stat-val">25%</span></div></div>
+        <div class="risk-bar" style="width:25%;background:#fdae61"></div>
+        <div style="margin-top:5px"><div class="stat-row"><span class="stat-label">Road & Trail Ingress</span><span class="stat-val">10%</span></div></div>
+        <div class="risk-bar" style="width:10%;background:#58a6ff"></div>
+      </div>
+
+      <!-- LOG -->
+      <div class="stat-card">
+        <h4>📋 Geoprocessing Execution Log</h4>
+        <div class="analysis-log" id="gp-log">
+          <div class="log-line ok">✓ Connected to ArcGIS Pro Geodatabase</div>
+          <div class="log-line ok">✓ Loaded Esri World Imagery (30m & sub-meter)</div>
+          <div class="log-line ok">✓ SRTM 30m DEM slope calculated (Yeoor ridge 42°)</div>
+          <div class="log-line ok">✓ MODIS/Landsat NDVI fuel dry fraction classified</div>
+          <div class="log-line ok">✓ Euclidean Distance to WUI boundaries generated</div>
+          <div class="log-line ok">✓ Multi-Criteria AHP Raster Overlay executed</div>
+          <div class="log-line ok">✓ 5-Class WSI Zonation complete</div>
+          <div class="log-line info">ℹ All layers synchronized with Live Map & Layouts</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GEOPROCESSING STEPS -->
+    <div id="geoprocess">
+      <h4>⚙ ModelBuilder Workflow</h4>
+      <div class="gp-tool" onclick="runGP('weighted')">
+        <span>⚖</span><span class="gp-name">Weighted Overlay (WSI)</span><span class="gp-status">Done</span>
+      </div>
+      <div class="gp-tool" onclick="runGP('buffer')">
+        <span>📏</span><span class="gp-name">Buffer Analysis (500m WUI)</span><span class="gp-status">Done</span>
+      </div>
+      <div class="gp-tool" onclick="runGP('network')">
+        <span>🚨</span><span class="gp-name">Service Area / Network Isochrones</span><span class="gp-status">Done</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<script>
+// ── LEAFLET INITIALIZATION ──────────────────────────────────────────────────
+let map;
+let baseLayers = {};
+let currentBasemap = 'satellite';
+let activeTool = 'pan';
+let currentMode = 'live'; // 'live' or 'layout'
+let currentPreset = 'study';
+
+const sgnpBounds = [
+  [19.138, 72.852], // South-West
+  [19.290, 72.978]  // North-East
+];
+
+// SGNP Boundary Polygon
+const sgnpCoords = [
+  [19.230, 72.862],
+  [19.245, 72.865],
+  [19.262, 72.868],
+  [19.272, 72.875],
+  [19.280, 72.890],
+  [19.288, 72.915],
+  [19.284, 72.935],
+  [19.272, 72.952],
+  [19.255, 72.965],
+  [19.235, 72.968],
+  [19.215, 72.962],
+  [19.195, 72.955],
+  [19.175, 72.945],
+  [19.155, 72.940],
+  [19.145, 72.928],
+  [19.140, 72.910],
+  [19.145, 72.895],
+  [19.160, 72.885],
+  [19.180, 72.880],
+  [19.198, 72.872],
+  [19.215, 72.865],
+  [19.230, 72.862]
+];
+
+// Layer Groups
+let layerSGNP, layerWater, layerWSI, layerWUI, layerHotspots, layerLandmarks, layerStations, layerRoutes;
+
+function initLeafletMap() {
+  map = L.map('leaflet-map', {
+    center: [19.214, 72.915],
+    zoom: 12,
+    minZoom: 11,
+    maxZoom: 18,
+    zoomControl: true
+  });
+
+  // Basemaps
+  baseLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri, Maxar, Earthstar Geographics'
+  });
+
+  baseLayers.topo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; National Geographic, DeLorme'
+  });
+
+  baseLayers.osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  });
+
+  baseLayers.satellite.addTo(map);
+
+  // 1. SGNP Boundary Layer
+  layerSGNP = L.polygon(sgnpCoords, {
+    color: '#ffff00',
+    weight: 2.8,
+    dashArray: '6, 6',
+    fillColor: '#3fb950',
+    fillOpacity: 0.12
+  }).bindPopup(`
+    <div class="gis-popup">
+      <h4>🌲 Sanjay Gandhi National Park</h4>
+      <div class="gis-popup-row"><span class="gis-popup-label">Legal Status:</span><span class="gis-popup-val">National Park (IV)</span></div>
+      <div class="gis-popup-row"><span class="gis-popup-label">Total Area:</span><span class="gis-popup-val">103.84 km²</span></div>
+      <div class="gis-popup-row"><span class="gis-popup-label">Districts:</span><span class="gis-popup-val">Mumbai Suburban & Thane</span></div>
+      <div class="gis-popup-row"><span class="gis-popup-label">Biome:</span><span class="gis-popup-val">Tropical Moist/Dry Deciduous</span></div>
+    </div>
+  `).addTo(map);
+
+  // 2. Lakes
+  layerWater = L.layerGroup([
+    L.circle([19.190, 72.918], { radius: 950, color: '#ffffff', weight: 1.5, fillColor: '#00bcd4', fillOpacity: 0.85 }).bindPopup(`
+      <div class="gis-popup">
+        <h4>💧 Tulsi Lake Reservoir</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">Catchment:</span><span class="gis-popup-val">Protected Forest Core</span></div>
+        <div class="gis-popup-row"><span class="gis-popup-label">Capacity:</span><span class="gis-popup-val">2,291 MLD (Drinking Supply)</span></div>
+        <div class="gis-popup-row"><span class="gis-popup-label">Fire Threat:</span><span class="gis-popup-val"><span class="badge-safe">Negligible (Refuge)</span></span></div>
+      </div>
+    `),
+    L.circle([19.144, 72.902], { radius: 1100, color: '#ffffff', weight: 1.5, fillColor: '#00bcd4', fillOpacity: 0.85 }).bindPopup(`
+      <div class="gis-popup">
+        <h4>💧 Vihar Lake Reservoir</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">Catchment:</span><span class="gis-popup-val">Southern SGNP Margin</span></div>
+        <div class="gis-popup-row"><span class="gis-popup-label">Supply:</span><span class="gis-popup-val">Municipal Corp. of Greater Mumbai</span></div>
+        <div class="gis-popup-row"><span class="gis-popup-label">Fire Threat:</span><span class="gis-popup-val"><span class="badge-safe">Very Low</span></span></div>
+      </div>
+    `)
+  ]).addTo(map);
+
+  // 3. WSI Susceptibility Heatmap Overlay (Analytical Multi-polygon zones)
+  layerWSI = L.layerGroup([
+    // Very High WSI: Eastern Yeoor Ridge
+    L.polygon([
+      [19.230, 72.950], [19.260, 72.965], [19.245, 72.968], [19.220, 72.955]
+    ], { color: '#d7191c', weight: 1.5, fillColor: '#d7191c', fillOpacity: 0.55 }).bindPopup(`
+      <div class="gis-popup">
+        <h4>🔥 Eastern Yeoor Ridge — Very High WSI</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">WSI Score:</span><span class="gis-popup-val"><span class="badge-danger">0.91 (Very High)</span></span></div>
+        <div class="gis-popup-label">Slope: 35°–48° | High Dry Fuel Load</div>
+        <div class="gis-popup-label">Prescription: Immediate fuel breaks & static watchtower patrol</div>
+      </div>
+    `),
+    // High WSI: Dahisar & Borivali North Periphery
+    L.polygon([
+      [19.245, 72.865], [19.272, 72.875], [19.260, 72.895], [19.235, 72.880]
+    ], { color: '#fdae61', weight: 1.2, fillColor: '#fdae61', fillOpacity: 0.55 }).bindPopup(`
+      <div class="gis-popup">
+        <h4>⚠️ Dahisar-Borivali WUI Corridor — High WSI</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">WSI Score:</span><span class="gis-popup-val"><span class="badge-warn">0.78 (High)</span></span></div>
+        <div class="gis-popup-label">Anthropogenic interface; high summer ignition frequency</div>
+      </div>
+    `),
+    // Moderate WSI: Kanheri Slope Transition
+    L.polygon([
+      [19.195, 72.885], [19.225, 72.900], [19.215, 72.930], [19.185, 72.915]
+    ], { color: '#ffffbf', weight: 1, fillColor: '#ffffbf', fillOpacity: 0.45 }).bindPopup(`
+      <div class="gis-popup">
+        <h4>🟡 Central Transition Zone — Moderate WSI</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">WSI Score:</span><span class="gis-popup-val">0.52 (Moderate)</span></div>
+        <div class="gis-popup-label">Mixed deciduous canopy; monitored tourist corridor</div>
+      </div>
+    `),
+    // Low / Very Low: Tulsi Core Sanctuary
+    L.polygon([
+      [19.170, 72.905], [19.200, 72.910], [19.195, 72.935], [19.165, 72.925]
+    ], { color: '#1a9641', weight: 1, fillColor: '#1a9641', fillOpacity: 0.45 }).bindPopup(`
+      <div class="gis-popup">
+        <h4>🌿 Tulsi Catchment Sanctuary — Low/Very Low WSI</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">WSI Score:</span><span class="gis-popup-val"><span class="badge-safe">0.18 (Low)</span></span></div>
+        <div class="gis-popup-label">Dense evergreen moisture barrier; natural wildfire refuge</div>
+      </div>
+    `)
+  ]).addTo(map);
+
+  // 4. WUI 500m Buffer
+  layerWUI = L.layerGroup([
+    L.polygon([
+      [19.160, 72.858], [19.160, 72.868], [19.265, 72.868], [19.265, 72.858]
+    ], { color: '#ff5722', weight: 1.5, dashArray: '4, 4', fillColor: '#ff5722', fillOpacity: 0.28 }).bindPopup(`
+      <div class="gis-popup">
+        <h4>🏘 Western Wildland-Urban Interface (WUI)</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">Buffer Width:</span><span class="gis-popup-val">500 meters</span></div>
+        <div class="gis-popup-row"><span class="gis-popup-label">Exposed Population:</span><span class="gis-popup-val">> 450,000 residents</span></div>
+      </div>
+    `),
+    L.polygon([
+      [19.170, 72.950], [19.170, 72.972], [19.260, 72.972], [19.260, 72.950]
+    ], { color: '#ff5722', weight: 1.5, dashArray: '4, 4', fillColor: '#ff5722', fillOpacity: 0.28 }).bindPopup(`
+      <div class="gis-popup">
+        <h4>🏘 Eastern Thane-Mulund WUI Buffer</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">Buffer Width:</span><span class="gis-popup-val">500 meters</span></div>
+        <div class="gis-popup-row"><span class="gis-popup-label">Slope Hazard:</span><span class="gis-popup-val">High (Ridge Falloff)</span></div>
+      </div>
+    `)
+  ]).addTo(map);
+
+  // 5. Ignition Hotspots
+  layerHotspots = L.layerGroup([
+    L.circleMarker([19.245, 72.958], { radius: 8, color: '#ffffff', weight: 2, fillColor: '#ff1744', fillOpacity: 1 }).bindPopup(`
+      <div class="gis-popup">
+        <h4>🔥 Ignition Hotspot: Yeoor High Ridge</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">Historical Incidents:</span><span class="gis-popup-val">14 fires / 5 yrs</span></div>
+        <div class="gis-popup-row"><span class="gis-popup-label">Cause:</span><span class="gis-popup-val">Dry bamboo & campfire sparks</span></div>
+      </div>
+    `),
+    L.circleMarker([19.255, 72.872], { radius: 8, color: '#ffffff', weight: 2, fillColor: '#ff1744', fillOpacity: 1 }).bindPopup(`
+      <div class="gis-popup">
+        <h4>🔥 Ignition Hotspot: Dahisar Perimeter</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">Historical Incidents:</span><span class="gis-popup-val">9 fires / 5 yrs</span></div>
+        <div class="gis-popup-row"><span class="gis-popup-label">Cause:</span><span class="gis-popup-val">Waste burning & boundary friction</span></div>
+      </div>
+    `)
+  ]).addTo(map);
+
+  // 6. Landmarks
+  layerLandmarks = L.layerGroup([
+    L.marker([19.2057, 72.9064]).bindPopup(`
+      <div class="gis-popup">
+        <h4>🏛 Kanheri Caves Archaeological Complex</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">Type:</span><span class="gis-popup-val">Heritage Monument (ASI)</span></div>
+        <div class="gis-popup-row"><span class="gis-popup-label">Daily Tourists:</span><span class="gis-popup-val">2,000 – 8,000 visitors</span></div>
+        <div class="gis-popup-row"><span class="gis-popup-label">Evacuation Status:</span><span class="gis-popup-val">Priority Corridor 1</span></div>
+      </div>
+    `),
+    L.marker([19.227, 72.863]).bindPopup(`
+      <div class="gis-popup">
+        <h4>🏢 Borivali Main Entrance & SGNP HQ</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">Role:</span><span class="gis-popup-val">Primary Command Post & Staging Area</span></div>
+      </div>
+    `),
+    L.marker([19.217, 72.925]).bindPopup(`
+      <div class="gis-popup">
+        <h4>⛰ Jambulmal Peak (468m)</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">Highest Point:</span><span class="gis-popup-val">Mumbai Suburban District</span></div>
+        <div class="gis-popup-row"><span class="gis-popup-label">Infrastructure:</span><span class="gis-popup-val">Forest Watchtower & Radio Repeater</span></div>
+      </div>
+    `),
+    L.marker([19.231, 72.968]).bindPopup(`
+      <div class="gis-popup">
+        <h4>🏢 Yeoor Gate (Thane Ingress)</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">Role:</span><span class="gis-popup-val">Eastern Ingress & Assembly Point B</span></div>
+      </div>
+    `)
+  ]).addTo(map);
+
+  // 7. Fire Stations & Watchtowers
+  layerStations = L.layerGroup([
+    L.circleMarker([19.230, 72.855], { radius: 9, color: '#ffffff', weight: 2, fillColor: '#ff1744', fillOpacity: 0.9 }).bindPopup(`
+      <div class="gis-popup">
+        <h4>🚒 Borivali Fire Brigade Station</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">Agency:</span><span class="gis-popup-val">MCGM Fire Department</span></div>
+        <div class="gis-popup-row"><span class="gis-popup-label">Response Time:</span><span class="gis-popup-val">8 – 14 mins to Park HQ</span></div>
+      </div>
+    `),
+    L.circleMarker([19.215, 72.975], { radius: 9, color: '#ffffff', weight: 2, fillColor: '#ff1744', fillOpacity: 0.9 }).bindPopup(`
+      <div class="gis-popup">
+        <h4>🚒 Thane Central Fire Station</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">Agency:</span><span class="gis-popup-val">TMC Fire Department</span></div>
+        <div class="gis-popup-row"><span class="gis-popup-label">Response Time:</span><span class="gis-popup-val">12 – 18 mins to Yeoor Gate</span></div>
+      </div>
+    `),
+    L.circleMarker([19.217, 72.925], { radius: 8, color: '#00e5ff', weight: 2, fillColor: '#00e5ff', fillOpacity: 0.9 }).bindPopup(`
+      <div class="gis-popup">
+        <h4>🗼 Jambulmal Summit Watchtower</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">Elevation:</span><span class="gis-popup-val">468 meters AMSL</span></div>
+        <div class="gis-popup-row"><span class="gis-popup-label">Observation Arc:</span><span class="gis-popup-val">360° Visual Sightline (Full SGNP)</span></div>
+      </div>
+    `)
+  ]).addTo(map);
+
+  // 8. Evacuation Routes & Buffers
+  layerRoutes = L.layerGroup([
+    // Kanheri Evacuation Spine
+    L.polyline([[19.206, 72.906], [19.222, 72.880], [19.228, 72.863]], {
+      color: '#00e676', weight: 4.5, opacity: 0.9
+    }).bindPopup(`
+      <div class="gis-popup">
+        <h4>🚨 Primary Evacuation Route 1</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">Span:</span><span class="gis-popup-val">Kanheri Caves → Borivali Main Gate</span></div>
+        <div class="gis-popup-row"><span class="gis-popup-label">Width:</span><span class="gis-popup-val">Double-lane Asphalt (Heavy Vehicles)</span></div>
+      </div>
+    `),
+    // Yeoor Spine
+    L.polyline([[19.215, 72.935], [19.230, 72.955], [19.232, 72.968]], {
+      color: '#00e676', weight: 4.5, opacity: 0.9
+    }).bindPopup(`
+      <div class="gis-popup">
+        <h4>🚨 Primary Evacuation Route 2</h4>
+        <div class="gis-popup-row"><span class="gis-popup-label">Span:</span><span class="gis-popup-val">Yeoor Plateau → Upvan Gate (Thane)</span></div>
+      </div>
+    `),
+    // 15-min and 30-min response rings
+    L.circle([19.228, 72.863], { radius: 2500, color: '#00e676', weight: 1.5, dashArray: '4, 4', fill: false }),
+    L.circle([19.228, 72.863], { radius: 4500, color: '#ffeb3b', weight: 1.5, dashArray: '4, 4', fill: false })
+  ]).addTo(map);
+
+  // Mouse move coordinate tracker
+  map.on('mousemove', function(e) {
+    const lat = e.latlng.lat.toFixed(4);
+    const lng = e.latlng.lng.toFixed(4);
+    // Approximate elevation based on distance from Jambulmal (19.217, 72.925)
+    const distToPeak = Math.hypot(e.latlng.lat - 19.217, e.latlng.lng - 72.925);
+    const elev = Math.max(15, Math.round(468 * Math.exp(-distToPeak / 0.045) + 35 * Math.sin(e.latlng.lat*100)));
+    document.getElementById('coord-info').textContent = `${lat}°N ${lng}°E | Elev: ${elev}m AMSL`;
+  });
+
+  // Identify Tool on Map Click
+  map.on('click', function(e) {
+    if (activeTool !== 'identify') return;
+    const lat = e.latlng.lat.toFixed(5);
+    const lng = e.latlng.lng.toFixed(5);
+    
+    // Calculate synthetic WSI score at clicked location
+    const distPeak = Math.hypot(e.latlng.lat - 19.217, e.latlng.lng - 72.925);
+    const distYeoor = Math.hypot(e.latlng.lat - 19.245, e.latlng.lng - 72.960);
+    const distTulsi = Math.hypot(e.latlng.lat - 19.190, e.latlng.lng - 72.918);
+    
+    let score = 0.35 + 0.45 * Math.exp(-distYeoor / 0.03) - 0.50 * Math.exp(-distTulsi / 0.02) + (Math.random()*0.08 - 0.04);
+    score = Math.max(0.05, Math.min(0.96, score));
+    
+    let clsName = "Moderate";
+    let badgeClass = "badge-warn";
+    if (score >= 0.80) { clsName = "Very High"; badgeClass = "badge-danger"; }
+    else if (score >= 0.65) { clsName = "High"; badgeClass = "badge-warn"; }
+    else if (score >= 0.45) { clsName = "Moderate"; badgeClass = ""; }
+    else if (score >= 0.25) { clsName = "Low"; badgeClass = "badge-safe"; }
+    else { clsName = "Very Low"; badgeClass = "badge-safe"; }
+
+    L.popup()
+      .setLatLng(e.latlng)
+      .setContent(`
+        <div class="gis-popup">
+          <h4>ℹ Identify Result (AHP-WSI)</h4>
+          <div class="gis-popup-row"><span class="gis-popup-label">Coordinates:</span><span class="gis-popup-val">${lat}°N, ${lng}°E</span></div>
+          <div class="gis-popup-row"><span class="gis-popup-label">Susceptibility (WSI):</span><span class="gis-popup-val"><span class="${badgeClass}">${score.toFixed(3)} (${clsName})</span></span></div>
+          <div class="gis-popup-row"><span class="gis-popup-label">Slope Hazard:</span><span class="gis-popup-val">${score > 0.6 ? 'Steep (> 30°)' : 'Gentle to Rolling'}</span></div>
+          <div class="gis-popup-row"><span class="gis-popup-label">Vegetation Type:</span><span class="gis-popup-val">${score > 0.6 ? 'Dry Deciduous / Bamboo' : 'Moist Mixed Forest'}</span></div>
+          <div class="gis-popup-row"><span class="gis-popup-label">Response Zone:</span><span class="gis-popup-val">${e.latlng.lng < 72.91 ? 'Borivali Fire Station' : 'Thane Fire Station'}</span></div>
+        </div>
+      `)
+      .openOn(map);
+  });
+}
+
+// Switch between Live Leaflet GIS and Published ArcGIS Plates
+function switchViewerMode(mode) {
+  currentMode = mode;
+  const btnLive = document.getElementById('btnModeLive');
+  const btnLayout = document.getElementById('btnModeLayout');
+  const leafletEl = document.getElementById('leaflet-map');
+  const layoutEl = document.getElementById('layout-view');
+
+  if (mode === 'live') {
+    btnLive.classList.add('active');
+    btnLayout.classList.remove('active');
+    leafletEl.style.display = 'block';
+    layoutEl.style.display = 'none';
+    map.invalidateSize();
+    document.getElementById('sb-status').textContent = 'Live Leaflet GIS Active';
+  } else {
+    btnLayout.classList.add('active');
+    btnLive.classList.remove('active');
+    leafletEl.style.display = 'none';
+    layoutEl.style.display = 'flex';
+    updateLayoutImage();
+    document.getElementById('sb-status').textContent = 'ArcGIS Pro Layout Plate Active';
+  }
+}
+
+// Preset views
+const layoutMapImages = {
+  study: 'visuals/map_01_study_area.png',
+  susc: 'visuals/map_02_wildfire_susceptibility.png',
+  risk: 'visuals/map_03_wildfire_risk_exposure.png',
+  evac: 'visuals/map_04_evacuation_accessibility.png'
+};
+
+const layoutMapTitles = {
+  study: 'ArcGIS Pro 300 DPI Export — Map 1: Study Area Baseline',
+  susc: 'ArcGIS Pro 300 DPI Export — Map 2: Wildfire Susceptibility Zonation (WSI)',
+  risk: 'ArcGIS Pro 300 DPI Export — Map 3: Risk & Asset Exposure Assessment',
+  evac: 'ArcGIS Pro 300 DPI Export — Map 4: Emergency Response & Evacuation Accessibility'
+};
+
+function setViewPreset(preset) {
+  currentPreset = preset;
+  document.querySelectorAll('#topbar .tb-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('btn-' + preset);
+  if (btn) btn.classList.add('active');
+
+  if (currentMode === 'layout') {
+    updateLayoutImage();
+  }
+
+  // Adjust Leaflet layer highlights based on view
+  if (preset === 'study') {
+    zoomTo('full');
+    setLayersVis({ bound: true, water: true, landmarks: true, wsi: false, wui: false, hotspots: false, stations: false, routes: false });
+  } else if (preset === 'susc') {
+    zoomTo('full');
+    setLayersVis({ bound: true, water: true, landmarks: true, wsi: true, wui: false, hotspots: true, stations: false, routes: false });
+  } else if (preset === 'risk') {
+    zoomTo('full');
+    setLayersVis({ bound: true, water: true, landmarks: true, wsi: true, wui: true, hotspots: true, stations: false, routes: false });
+  } else if (preset === 'evac') {
+    zoomTo('full');
+    setLayersVis({ bound: true, water: true, landmarks: true, wsi: false, wui: false, hotspots: false, stations: true, routes: true });
+  }
+}
+
+function updateLayoutImage() {
+  const img = document.getElementById('layout-img');
+  const badge = document.getElementById('layout-title-badge');
+  img.style.opacity = '0.3';
+  setTimeout(() => {
+    img.src = layoutMapImages[currentPreset];
+    badge.textContent = layoutMapTitles[currentPreset];
+    img.style.opacity = '1';
+  }, 150);
+}
+
+// Layer visibility controls
+function toggleGISLayer(layerKey) {
+  const chk = document.getElementById('chk-' + layerKey);
+  const isChecked = chk.checked;
+  const item = document.getElementById('item-' + layerKey);
+  if (item) item.classList.toggle('active', isChecked);
+
+  const layerMap = {
+    wsi: layerWSI,
+    wui: layerWUI,
+    hotspots: layerHotspots,
+    bound: layerSGNP,
+    water: layerWater,
+    landmarks: layerLandmarks,
+    stations: layerStations,
+    routes: layerRoutes
+  };
+
+  const lyr = layerMap[layerKey];
+  if (!lyr) return;
+  if (isChecked) {
+    if (!map.hasLayer(lyr)) map.addLayer(lyr);
+  } else {
+    if (map.hasLayer(lyr)) map.removeLayer(lyr);
+  }
+}
+
+function setLayersVis(state) {
+  for (const [k, v] of Object.entries(state)) {
+    const chk = document.getElementById('chk-' + k);
+    if (chk) {
+      chk.checked = v;
+      toggleGISLayer(k);
+    }
+  }
+}
+
+function resetLayers() {
+  setLayersVis({ bound: true, water: true, landmarks: true, wsi: true, wui: true, hotspots: true, stations: true, routes: true });
+}
+
+// Opacity change
+function changeWsiOpacity(val) {
+  const alpha = val / 100;
+  document.getElementById('op-val').textContent = val + '%';
+  if (layerWSI) {
+    layerWSI.eachLayer(l => {
+      if (l.setStyle) l.setStyle({ fillOpacity: alpha * 0.85 });
+    });
+  }
+}
+
+// Basemap switcher
+function setLeafletBasemap(type) {
+  if (currentBasemap === type) return;
+  map.removeLayer(baseLayers[currentBasemap]);
+  baseLayers[type].addTo(map);
+  currentBasemap = type;
+  const names = {
+    satellite: 'Esri World Imagery (High-Res)',
+    topo: 'Esri World Topographic Relief',
+    osm: 'OpenStreetMap Standard Roads'
+  };
+  document.getElementById('sb-bm').textContent = names[type] || type;
+}
+
+// Tool setting
+function setActiveTool(tool) {
+  activeTool = tool;
+  document.getElementById('t-pan').classList.toggle('sel', tool === 'pan');
+  document.getElementById('t-identify').classList.toggle('sel', tool === 'identify');
+  const container = document.getElementById('leaflet-map');
+  container.style.cursor = tool === 'identify' ? 'crosshair' : 'grab';
+}
+
+// Zoom presets
+function zoomTo(target) {
+  const bookmarks = {
+    full: { center: [19.214, 72.915], zoom: 12 },
+    kanheri: { center: [19.206, 72.906], zoom: 15 },
+    yeoor: { center: [19.245, 72.960], zoom: 14 },
+    tulsi: { center: [19.167, 72.910], zoom: 13 }
+  };
+  const bm = bookmarks[target];
+  if (bm && map) {
+    map.flyTo(bm.center, bm.zoom, { duration: 1.2 });
+  }
+}
+
+// Geoprocessing Simulation
+function runGP(type) {
+  const pb = document.getElementById('progressBar');
+  pb.style.width = '0%';
+  document.getElementById('sb-status').textContent = 'Executing Geoprocessing: ' + type + '...';
+  let pct = 0;
+  const iv = setInterval(() => {
+    pct += Math.random() * 20;
+    if (pct >= 100) {
+      pct = 100;
+      clearInterval(iv);
+      document.getElementById('sb-status').textContent = 'Geoprocessing Complete ✓';
+    }
+    pb.style.width = Math.min(100, pct) + '%';
+  }, 120);
+
+  const log = document.getElementById('gp-log');
+  const d = document.createElement('div');
+  d.className = 'log-line ok';
+  d.textContent = '✓ Executed tool [' + type + '] successfully on SGNP raster';
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
+}
+
+function toggleGroup(id) {
+  const el = document.getElementById(id);
+  el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+}
+
+// Init when page loads
+window.addEventListener('load', () => {
+  initLeafletMap();
+});
+</script>
+</body>
+</html>

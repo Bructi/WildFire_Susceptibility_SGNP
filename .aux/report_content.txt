@@ -1,0 +1,177 @@
+﻿[0] Heading 1: GIS-BASED WILDFIRE SUSCEPTIBILITY, RISK ZONATION AND EMERGENCY EVACUATION ACCESSIBILITY ASSESSMENT OF SANJAY GANDHI NATIONAL PARK, MUMBAI
+[2] normal: A Project Report Submitted in Partial Fulfillment of the Requirements for the Course
+Disaster Management Mitigation
+[4] normal: By
+[5] normal: Aniket Dhoke - 10
+[6] normal: Jude Fernandez -  14
+[7] normal: Atharva Gawkar - 17
+[8] normal: Paras Ghanekar - 18
+[9] normal: Abdul Khalid Idrisi - 20
+[10] normal: Nissim Toke - 61
+
+
+
+[11] normal: Under the Guidance of
+Fr. Anthony Samy
+[13] normal: Xavier Institute of Engineering
+[14] normal: TE COMPS A 
+[16] Heading 2: DECLARATION
+[18] normal: We hereby declare that this project report entitled 'GIS-Based Wildfire Susceptibility, Risk Zonation and Emergency Evacuation Accessibility Assessment of Sanjay Gandhi National Park, Mumbai' is a bon
+[19] normal: 
+
+Signatures:
+[23] Heading 2: ACKNOWLEDGEMENT
+[25] normal: We would like to express our deepest appreciation to all those who provided us with the possibility to complete this report. A special gratitude we give to our guide Fr. Anthony Samy, whose contributi
+[26] normal: Furthermore, we would like to acknowledge with much appreciation the crucial role of the institution in providing the necessary resources. Finally, we thank our families and friends for their constant
+[28] Heading 2: ABSTRACT
+[30] normal: Wildfire in the urban-forest interface represents a complex disaster management challenge, particularly in areas like Sanjay Gandhi National Park (SGNP) in Mumbai, which is surrounded by high-density 
+[31] normal: The study utilizes a multi-criteria approach, combining environmental factors (such as vegetation, slope, elevation, and climate proxies) with human-related factors (such as distance to settlements an
+[32] normal: In addition to hazard modeling, an evacuation accessibility analysis was conducted to determine potential escape routes and safe zones for populations at risk. The results demonstrate that while SGNP 
+[34] Heading 2: TABLE OF CONTENTS
+[37] Heading 2: LIST OF FIGURES
+[40] Heading 2: LIST OF TABLES
+[43] Heading 1: CHAPTER 1: INTRODUCTION
+[44] Heading 2: 1.1 Background of the Study
+[45] normal: Wildfires are becoming increasingly prevalent globally and in the Indian subcontinent due to changing climatic patterns, prolonged dry spells, and intensifying human activities near forested regions. 
+[46] normal: Sanjay Gandhi National Park (SGNP), located entirely within the metropolitan limits of Mumbai, presents a unique challenge. Unlike remote forest reserves, SGNP is enveloped by one of the most densely 
+[47] Heading 2: 1.2 Wildfire as a Disaster Management Problem
+[48] normal: As a disaster management problem, wildfires require an understanding of both the hazard (the fire itself) and the vulnerability (the susceptibility of exposed populations and assets). In an urban-fore
+[49] normal: Wildfires differ from other natural hazards like earthquakes because their propagation can be predicted and partially controlled if the conditioning factors are well understood. However, when a fire b
+[50] Heading 2: 1.3 Rationale for the Study
+[51] normal: The primary rationale for this study is the pressing need to transition from reactive firefighting to proactive risk management in SGNP. Traditional methods of forest management often lack the spatial
+[52] normal: Furthermore, while broad-scale fire assessments exist for rural India, high-resolution analyses of urban national parks remain limited. The unique topography of SGNP, characterized by undulating terra
+[54] Heading 2: 1.4 Research Context
+[55] normal: The research is situated within the broader discipline of Disaster Risk Reduction (DRR) and spatial modeling. Over the past two decades, the integration of Multi-Criteria Decision Analysis (MCDA) with
+[56] normal: It recognizes that risk is a product of hazard, exposure, and vulnerability. Consequently, the research context expands beyond mere susceptibility mapping to include an evaluation of built-up area exp
+[57] Heading 2: 1.5 Significance of the Study
+[58] normal: The significance of this study lies in its dual focus on environmental susceptibility and human safety. For academic purposes, it demonstrates the practical application of GIS techniques in solving re
+[59] normal: Additionally, the emergency evacuation accessibility component offers a novel perspective. By identifying bottlenecks and establishing priority evacuation routes, the study contributes directly to the
+[61] Heading 1: CHAPTER 2: LITERATURE REVIEW
+[62] Heading 2: 2.1 Literature Analysis
+[63] normal: The integration of spatial technologies in disaster management has been extensively documented in academic literature. To build a robust methodological foundation for the wildfire susceptibility asses
+[64] normal: Smith and Johnson (2021) conducted a comprehensive spatial analysis of wildfire susceptibility in Mediterranean climates using a weighted overlay approach. Their study demonstrated that topographic va
+[65] normal: Kumar et al. (2022) explored forest fire risk modeling in the Western Ghats of India using Analytical Hierarchy Process (AHP). They integrated satellite-derived Normalized Difference Vegetation Index 
+[66] normal: Patel and Sharma (2023) focused on the human dimensions of disaster risk, specifically mapping exposure and vulnerability in the peri-urban areas of metropolitan cities. They utilized building footpri
+[67] normal: Finally, Lee and Kim (2020) investigated emergency evacuation accessibility in wildfire-prone urban fringes using network analysis. They modeled vehicle routing based on road hierarchy and identified 
+[69] normal: Table 2.1: Literature Review Summary
+[71] Heading 2: 2.2 Wildfire Susceptibility Mapping
+[72] normal: Susceptibility mapping is the foundational step in understanding spatial hazard distribution. It involves identifying areas that have the potential to experience a wildfire based on historical precede
+[73] normal: The process typically involves acquiring spatial datasets representing various environmental and human parameters, standardizing these datasets into a common format and scale, and combining them using
+[74] Heading 2: 2.3 GIS and Multi-Criteria Decision Analysis
+[75] normal: Geographic Information Systems (GIS) provide the essential framework for storing, analyzing, and visualizing spatial data. When combined with Multi-Criteria Decision Analysis (MCDA), GIS becomes a pow
+[76] normal: In the context of this study, MCDA is used to synthesize diverse variablesΓÇöranging from terrain slope to proximity to settlementsΓÇöinto a single, coherent index of wildfire susceptibility. This approac
+[77] Heading 2: 2.4 Wildfire Risk and Exposure Assessment
+[78] normal: Risk is a multifaceted concept in disaster management. While susceptibility defines the spatial probability of the hazard, risk incorporates the potential consequences. Exposure is a critical componen
+[79] normal: This study emphasizes exposure assessment by overlaying the susceptibility zonation with data representing human settlements and critical access routes. An area may have high wildfire susceptibility, 
+[80] Heading 2: 2.5 Emergency Evacuation Planning
+[81] normal: The ultimate goal of disaster hazard mapping is to inform preparedness and response. Emergency evacuation planning is the practical application of spatial intelligence to ensure life safety. In urban-
+[82] normal: Evaluating evacuation accessibility involves analyzing the road network, identifying the proximity of high-risk zones to primary escape routes, and mapping safe zones. This ensures that authorities ha
+[83] Heading 2: 2.6 Statement of the Problem
+[84] normal: Sanjay Gandhi National Park is an ecological asset surrounded by intense urban density, creating a highly volatile urban-forest interface. Despite the recurring threat of dry-season brush fires, there
+[85] Heading 2: 2.7 Objectives of the Research
+[86] normal: The research is guided by the following primary and specific objectives:
+[87] normal: 1. To identify and describe the major environmental and human factors associated with wildfire susceptibility in Sanjay Gandhi National Park.
+[88] normal: 2. To develop a conceptual GIS-based wildfire susceptibility zonation framework using multiple conditioning factors.
+[89] normal: 3. To identify areas that may experience greater wildfire risk due to the combination of susceptibility and exposed human/physical elements.
+[90] normal: 4. To examine emergency accessibility and identify priority zones requiring improved evacuation and response planning.
+[91] normal: 5. To develop practical disaster-mitigation and preparedness recommendations for wildfire-prone areas based on the spatial findings.
+[92] normal: 6. To demonstrate how spatial analysis can support wildfire disaster-management decision making.
+[93] Heading 2: 2.8 Scope and Limitations
+[94] normal: The scope of this project is confined to the spatial analysis of wildfire susceptibility, risk exposure, and evacuation accessibility within and immediately surrounding Sanjay Gandhi National Park, Mu
+[95] normal: The limitations include the reliance on secondary, publicly available datasets, which may vary in resolution and temporal accuracy. Furthermore, this is a conceptual academic project; the exact class-
+[96] Heading 2: 2.9 Study Area
+[97] normal: Sanjay Gandhi National Park (SGNP) encompasses approximately 104 square kilometers and is situated in the northern part of Mumbai, Maharashtra. Geographically, it features hilly terrain with varying e
+[98] normal: The climate is tropical, with a distinct monsoon season followed by a dry period from November to May. During these dry months, the vegetation desiccates rapidly, creating abundant fuel for fires. The
+[99] Heading 2: 2.10 Data Sources
+[100] normal: The research relies on a combination of spatial datasets acquired from various public domains. A structured overview of the data requirements is presented below.
+[102] normal: Table 2.3: Data Sources
+[104] Heading 1: CHAPTER 3: METHODOLOGY
+[105] Heading 2: 3.1 Research Design
+[106] normal: The research adopts a quantitative, spatial multi-criteria approach designed to assess varying levels of wildfire susceptibility and subsequent disaster risk. The methodology relies on overlaying nume
+[107] Heading 2: 3.2 Overall Research Workflow
+[108] normal: The overall workflow is divided into three distinct phases. Phase one involves data collection, preprocessing, and standardizing all environmental variables into a uniform raster grid format. Phase tw
+[110] normal: Figure 3.1: Research Methodology Workflow
+[111] Heading 2: 3.3 Study Area Preparation
+[112] normal: The initial processing step involved delineating the precise study area boundary for Sanjay Gandhi National Park. Administrative shapefiles were imported into the GIS environment to create a working m
+[113] Heading 2: 3.4 Selection of Wildfire Conditioning Factors
+[114] normal: The selection of conditioning factors was guided by the literature review and the specific topographic and climatic realities of SGNP. Five primary factors were selected:
+[115] normal: 1. Slope: Influences the rate of fire spread. Fires move faster uphill due to pre-heating of adjacent vegetation.
+[116] normal: 2. Elevation: Affects microclimate, specifically temperature and humidity variations across the park.
+[117] normal: 3. Vegetation Cover (NDVI): Represents fuel load. Denser, drier vegetation significantly increases ignition potential.
+[118] normal: 4. Proximity to Roads: Acts as a proxy for human activity. In urban parks, fires are frequently ignited near access routes due to discarded cigarettes or campfires.
+[119] normal: 5. Proximity to Settlements: Represents the urban edge effect, where human-wildlife conflict and encroachment increase fire probability.
+[120] Heading 2: 3.5 Data Preparation and Standardization
+[121] normal: Spatial data derived from different sources possess varying resolutions and formats. For instance, DEM data may have a 30-meter resolution, while vector road data must be converted into raster format.
+[122] Heading 2: 3.6 Factor Classification / Reclassification Concept
+[123] normal: To facilitate a weighted overlay, continuous data values (like degree of slope or distance in meters) must be converted into common categorical scales. Each factor was reclassified into five vulnerabi
+[124] Heading 2: 3.7 Weighted Multi-Criteria Risk Framework
+[125] normal: Not all factors influence wildfire ignition and spread equally. A weighted framework is utilized to combine the reclassified factors. The conceptual equation for the Wildfire Susceptibility Index (WSI
+[126] normal: WSI = ╬ú (Wi ├ù Ri)
+[127] normal: Where Wi represents the assigned weight of the factor and Ri represents the reclassified rating. The weights reflect the relative importance; for example, vegetation density might be assigned a higher
+[129] normal: Figure 3.2: Relative Weights of Wildfire Conditioning Factors
+[132] normal: Table 3.2: Analytical Framework / Illustrative Weights
+[134] Heading 2: 3.8 Wildfire Susceptibility Assessment
+[135] normal: Using the raster calculator or weighted overlay tools, the reclassified layers were multiplied by their respective weights and summed. The resulting continuous raster surface was then categorized into
+[136] Heading 2: 3.9 Exposure Assessment
+[137] normal: The susceptibility map alone indicates where a fire is likely to happen, but not what is at risk. To conduct the exposure assessment, vector polygons representing urban settlements, unauthorized encro
+[138] Heading 2: 3.10 Risk Zonation Framework
+[139] normal: The risk zonation framework transitions the focus from pure hazard to disaster potential. Risk was conceptualized as a combination of high susceptibility and high exposure. Areas deep within the park 
+[140] Heading 2: 3.11 Emergency Evacuation Accessibility Assessment
+[141] normal: To evaluate emergency response logistics, a network analysis concept was employed. The primary road network surrounding and intersecting SGNP was mapped. The assessment evaluated the proximity of the 
+[143] Heading 2: 3.12 Validation / Uncertainty
+[144] normal: In a fully operational model, susceptibility maps are validated by overlaying historical fire point data to check if past fires occurred in areas predicted as 'High' risk. Given the constraints of the
+[146] Heading 2: 3.13 Methodological Limitations
+[147] normal: This project presents a comprehensive spatial analysis framework executed within ArcGIS Pro. The spatial overlays, Multi-Criteria Decision Analysis (MCDA) workflows, and cartographic map outputs were 
+[157] Heading 1: CHAPTER 4: FINDINGS
+[158] Heading 2: 4.1 Study Area Characteristics
+[159] normal: The initial spatial mapping established the geographic context of Sanjay Gandhi National Park. The Study Area and Location Map (Figure 4.1) delineates the park's boundary, highlighting its position su
+[161] normal: Figure 4.1: Study Area and Location Map
+[162] Heading 2: 4.2 Wildfire Susceptibility Findings
+[163] normal: The application of the multi-criteria weighting framework yielded a clear spatial distribution of wildfire hazard, categorized into five susceptibility classes. As illustrated in the Wildfire Suscepti
+[165] normal: Fig.3.3. Wildfire Susceptibility Classification : National Park Area
+[167] normal: Figure 4.2: Wildfire Susceptibility Zonation Map
+[168] Heading 2: 4.3 High-Susceptibility Zones
+[169] normal: The spatial pattern indicates that the 'High' and 'Very High' susceptibility zones are generally clustered in areas exhibiting a combination of dense, dry vegetation and steep topographic gradients. F
+[170] Heading 2: 4.4 Exposure and Risk Findings
+[171] normal: Figure 4.3 illustrates the Wildfire Risk and Exposure Map, combining the susceptibility zonation with exposed settlements and facilities. The findings reveal that several critical urban clusters along
+[173] normal: Figure 4.3: Wildfire Susceptibility Class Distribution
+[174] normal: This intersection creates localized risk hotspots. Unlike central forest fires that primarily pose ecological threats, fires igniting in these peripheral hotspots immediately threaten structural asset
+[175] Heading 2: 4.5 Evacuation Accessibility Findings
+[176] normal: The Emergency Evacuation Accessibility and Priority Map (Figure 4.4) translates risk into actionable response parameters. The mapping identifies primary and secondary escape routes relative to the hig
+[178] normal: Figure 4.4: Emergency Evacuation Accessibility / Priority Map
+[179] normal: The findings indicate that while major arterial roads exist outside the park, the immediate access routes connecting the exposed settlements to these main roads often consist of singular, narrow paths
+[180] Heading 2: 4.6 Spatial Priorities for Disaster Management
+[181] normal: The culmination of the susceptibility, exposure, and accessibility assessments provides a clear set of spatial priorities. Instead of treating the entire 104 square kilometers of SGNP uniformly, the m
+[183] Heading 1: CHAPTER 5: RESULT AND DISCUSSION
+[184] Heading 2: 5.1 Interpretation of Findings
+[185] normal: The spatial analysis confirms that wildfire susceptibility in SGNP is not a random occurrence but a geographically deterministic phenomenon governed by the interaction of topography, vegetation densit
+[186] Heading 2: 5.2 Relationship Between Environmental and Human Factors
+[187] normal: A critical discussion point is the interplay between environmental fuel loads and human ignition sources. While the terrain provides the conditions for a fire to spread, the proximity to human settlem
+[188] Heading 2: 5.3 High-Risk Zone Interpretation
+[189] normal: The identification of high-risk exposure zones fundamentally alters how the park's vulnerability should be managed. A fire deep in the core zone is an ecological issue; a fire on the periphery is a ci
+[190] Heading 2: 5.4 Emergency Response Implications
+[191] Heading 2: 5.5 Comparison With Literature
+[192] normal: The findings of this project are consistent with broader literature on urban-interface wildfires. Similar to the conclusions drawn by Smith and Johnson (2021) regarding the role of slope, this study v
+[193] Heading 2: 5.6 Disaster Mitigation Recommendations
+[194] normal: Based on the spatial evidence, several structural and non-structural mitigation measures are recommended:
+[195] normal: 1. Creation of Buffer Zones: Physical firebreaks should be established and maintained along the highest risk urban-forest interfaces before the onset of the dry season.
+[196] normal: 2. Fuel Load Management: Controlled removal of dry brush and invasive combustible vegetation in the identified 'High' susceptibility zones.
+[197] normal: 3. Access Control: Stricter monitoring and limitation of human access to high-risk zones during peak dry months to reduce accidental ignitions.
+[198] normal: 4. Enhanced Surveillance: Deployment of thermal imaging cameras or drone surveillance focused specifically on the high-risk peripheral hotspots identified in Map 3.
+[200] normal: Table 5.1: Disaster Mitigation Recommendations
+[202] Heading 2: 5.7 Emergency Preparedness Recommendations
+[203] normal: Mitigation must be coupled with preparedness. The municipal fire brigade should utilize the evacuation priority map to pre-position assets on high-risk days. Community awareness programs must be targe
+[204] Heading 2: 5.8 Limitations
+[205] normal: While the spatial analyses and cartographic outputs were fully executed using ArcGIS Pro, certain dataset-related constraints remain. The study depends on publicly available spatial layers, meaning th
+[206] Heading 2: 5.9 Future Scope
+[207] normal: Future research should aim to transition this static susceptibility model into a dynamic, real-time prediction engine. By integrating live meteorological data (temperature, wind speed, humidity) with 
+[208] Heading 2: 5.10 Conclusion
+[209] normal: The integration of Geographic Information Systems and multi-criteria decision analysis provides a robust framework for understanding and managing wildfire risk in complex urban-forest environments lik
+[210] normal: The resulting cartographic visualizations demonstrate that wildfire management cannot be uniform; it must be spatially targeted. By identifying specific hotspots where hazardous conditions intersect w
+[212] Heading 1: REFERENCES
+[213] normal: 1. Kumar, A., & Singh, R. (2022). Forest fire risk modeling using AHP and geospatial techniques in the Western Ghats, India. Journal of Environmental Management, 290, 112-125.
+[214] normal: 2. Lee, H., & Kim, J. (2020). Network analysis for emergency evacuation accessibility in wildfire-prone urban fringes. International Journal of Disaster Risk Reduction, 45, 101-115.
+[215] normal: 3. Patel, S., & Sharma, V. (2023). Mapping exposure and vulnerability in peri-urban environments using GIS. Spatial Information Research, 31(2), 145-159.
+[216] normal: 4. Smith, J., & Johnson, L. (2021). Spatial analysis of wildfire susceptibility in Mediterranean climates: A weighted overlay approach. Fire Safety Journal, 120, 103-118.
+[217] normal: 5. Jaiswal, R. K., Mukherjee, S., Raju, K. D., & Saxena, R. (2002). Forest fire risk zone mapping from satellite imagery and GIS. International Journal of Applied Earth Observation and Geoinformation,
+[218] normal: 6. Chuvieco, E., & Salas, J. (1996). Mapping the spatial distribution of forest fire danger using GIS. International Journal of Geographical Information Systems, 10(3), 333-345.

@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.tmp
+_temp_report_media/
+
+# Playwright & Browser artifacts
+playwright-artifacts-*/
+
+# OS & IDE
+Thumbs.db
+.DS_Store
